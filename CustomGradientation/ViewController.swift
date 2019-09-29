@@ -17,9 +17,9 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         
-        csView = CustomView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
+       // csView = CustomView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
         
-     //   csView = CustomView(colors: ["#FF0000","#FFFF00"], selectedIndex: 1 , isInterpolated : true)
+       csView = CustomView(colors: ["#FF0000","#FFFF00"], selectedIndex: 2 , isInterpolated : true)
         
         view.addSubview(csView)
         

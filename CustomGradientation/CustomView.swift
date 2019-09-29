@@ -8,6 +8,11 @@
 
 import UIKit
 
+
+
+
+
+
 class CustomView: UIView {
 
     private var isInterpolated : Bool = false
@@ -28,10 +33,15 @@ class CustomView: UIView {
     
     private var locations : [Float] = []
     
+    private var interpolationValueDiff : Float = 0
+    
     func createLocationsArray(){
-        let step : Float = 1/Float(gradientColors.count)
-        for i in stride(from: Float(0), through: Float(1), by: step) {
-            locations.append(i)
+        
+        if !isInterpolated{
+            let step : Float = 1/Float(gradientColors.count)
+            for i in stride(from: Float(0), through: Float(1), by: step) {
+                locations.append(i)
+            }
         }
     }
     
@@ -47,28 +57,55 @@ class CustomView: UIView {
         super.init(coder : aDecoder)
     }
     
-    required init(colors : [String]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false ) {
+    required init(colors : [String]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false ,interpolationValue : Int = 2) {
         super.init(frame: CGRect.zero)
         
-        self.selectedIndex = selectedIndex < colors.count ? selectedIndex : 0
+
         
         self.isInterpolated = isInterpolated
+        
+        if isInterpolated{
+            createInterpolationRange(n: interpolationValue)
+        }
+        
+        self.selectedIndex = selectedIndex < colors.count || selectedIndex < locations.count ? selectedIndex : 0
         
         gradientColors = colors.map{$0.hexColor}
         
     }
     
-    required init(colors : [UIColor]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false) {
+    required init(colors : [UIColor]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false,interpolationValue : Int = 2) {
         super.init(frame: CGRect.zero)
-        
-        self.selectedIndex = selectedIndex < colors.count ? selectedIndex : 0
-        
+
         self.isInterpolated = isInterpolated
+        
+        if isInterpolated{
+            createInterpolationRange(n: interpolationValue)
+        }
+        
+        self.selectedIndex = selectedIndex < colors.count || selectedIndex < locations.count ? selectedIndex : 0
+        
         
         gradientColors = colors.map{$0}
         
     }
     
+    //MARK:- breaking a mathematical range in equal parts
+    //Creating locations for interpolation Layer for stops
+    func createInterpolationRange(n : Int){
+        
+        let startValue : Float = 0
+        let endValue : Float = 1
+        interpolationValueDiff = (endValue-startValue)/Float(n)
+        var element : Float = 0
+        locations.append(element)
+        for _ in 1...n{
+            element = element + interpolationValueDiff
+            locations.append(element)
+        }
+        
+        
+    }
     
     //MARK:- Create Gradient
     func gradientMaker(){
@@ -110,8 +147,6 @@ class CustomView: UIView {
         else{
             gradient.colors = gradientColors.map{$0.cgColor}
             
-            locations = [0,0.5,1]
-            
         }
         
         layer.insertSublayer(gradient, at: 0)
@@ -127,10 +162,12 @@ class CustomView: UIView {
     func createKnobForSlider(strokeColor : UIColor = .white , strokeWidth : CGFloat = 0 , backgroundColor : UIColor = .clear,shadowColor : UIColor = .darkGray) {
         
         //Setting Frame For KnobView
-        var knobSize : CGFloat = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) )
-            / 2 )
-    
-        elementSize = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) ) )
+
+        elementSize = ( frame.width * CGFloat( (1 / Float( isInterpolated ?  locations.count : gradientColors.count) ) ) )
+        
+        print(isInterpolated)
+        
+        var knobSize : CGFloat = elementSize/2
         
         var knobViewX : CGFloat = 0
        
@@ -148,6 +185,20 @@ class CustomView: UIView {
             knobSize = knobSize * 2
             knobViewY = frame.minY + ((frame.height - knobSize) / 2)
            
+        }
+        
+        if  isInterpolated{
+            let knobExtraHeight : CGFloat = 20
+            knobSize = frame.height + knobExtraHeight
+            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex )) + padding
+            knobViewY = frame.minY + ((frame.height - knobSize) / 2)
+            if selectedIndex == 0 {
+                knobViewX = frame.minX
+            }
+            else if selectedIndex == (locations.count - 1){
+                knobViewX = frame.maxX - knobSize
+            }
+            
         }
 
         
@@ -214,18 +265,64 @@ class CustomView: UIView {
         if ( x < 0 || x > 1) {
             return nil
         }
+        print(locations)
         
-        for (index,element) in locations.enumerated(){
-            if (Float(at.x / frame.width) <= element){
-                currentIndex = (index-1)
-                break
+        
+        if isInterpolated{
+            
+            for (index,element) in locations.enumerated(){
+
+                 if index == 0{
+                    
+                    if (Float(at.x / frame.width) <= (element + (interpolationValueDiff/Float(2))  ) ){
+                        currentIndex = (index)
+                        print(index)
+                        break
+                    }
+                    
+                }
+                else if index == locations.count - 1{
+                    
+                    if (Float(at.x / frame.width) >= (element - (interpolationValueDiff/Float(2))  ) ){
+                        currentIndex = (index)
+                        print(index)
+                        break
+                    }
+                    //(Float(at.x / frame.width)
+                }
+                else if  ((element - (interpolationValueDiff/Float(2)))..<(element + (interpolationValueDiff/Float(2)))).contains(Float(at.x / frame.width)){
+                    print(index)
+                    print(Float(at.x / frame.width))
+                    print((element + (interpolationValueDiff/Float(2))  ))
+                    print((element - (interpolationValueDiff/Float(2))  ))
+                        
+                    currentIndex = (index)
+                    break
+                }
+                
+                
             }
+            
+            return currentIndex
         }
-
-        return currentIndex
         
-
-        
+        else{
+            
+            for (index,element) in locations.enumerated(){
+                if (Float(at.x / frame.width) <= element){
+                    currentIndex = (index-1)
+                    break
+                }
+            }
+       
+            if currentIndex == -1 || currentIndex >= locations.count-1{
+                return nil
+            }
+ 
+            return currentIndex
+            
+            
+        }
     }
     
     
@@ -241,8 +338,26 @@ class CustomView: UIView {
                 [weak self] in
                 guard let `self` = self else {return}
 
-                self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
+                if self.isInterpolated{
                     
+                    if index == 0 {
+                        self.knobView.frame.origin.x = self.frame.minX
+                    }
+                    else if index == self.locations.count - 1{
+
+                        self.knobView.frame.origin.x = self.frame.maxX - self.knobView.frame.width
+                    }
+                    else{
+                        self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
+                    }
+                    
+
+                }
+                else{
+                    
+                    self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
+                    
+                }
 
                 
             }
