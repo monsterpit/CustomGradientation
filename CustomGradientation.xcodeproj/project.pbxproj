@@ -12,7 +12,7 @@
 		2CBCC57A233FBC1100868AEA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CBCC578233FBC1100868AEA /* Main.storyboard */; };
 		2CBCC57C233FBC1700868AEA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CBCC57B233FBC1700868AEA /* Assets.xcassets */; };
 		2CBCC57F233FBC1700868AEA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CBCC57D233FBC1700868AEA /* LaunchScreen.storyboard */; };
-		2CBCC587233FBC3200868AEA /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBCC586233FBC3200868AEA /* CustomView.swift */; };
+		2CBCC587233FBC3200868AEA /* CustomSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBCC586233FBC3200868AEA /* CustomSliderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +23,7 @@
 		2CBCC57B233FBC1700868AEA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2CBCC57E233FBC1700868AEA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2CBCC580233FBC1700868AEA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2CBCC586233FBC3200868AEA /* CustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
+		2CBCC586233FBC3200868AEA /* CustomSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSliderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +58,7 @@
 			children = (
 				2CBCC574233FBC1100868AEA /* AppDelegate.swift */,
 				2CBCC576233FBC1100868AEA /* ViewController.swift */,
-				2CBCC586233FBC3200868AEA /* CustomView.swift */,
+				2CBCC586233FBC3200868AEA /* CustomSliderView.swift */,
 				2CBCC578233FBC1100868AEA /* Main.storyboard */,
 				2CBCC57B233FBC1700868AEA /* Assets.xcassets */,
 				2CBCC57D233FBC1700868AEA /* LaunchScreen.storyboard */,
@@ -138,7 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CBCC587233FBC3200868AEA /* CustomView.swift in Sources */,
+				2CBCC587233FBC3200868AEA /* CustomSliderView.swift in Sources */,
 				2CBCC577233FBC1100868AEA /* ViewController.swift in Sources */,
 				2CBCC575233FBC1100868AEA /* AppDelegate.swift in Sources */,
 			);

@@ -10,16 +10,16 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    var csView : CustomView!
+    var csView : CustomSliderView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         
-       // csView = CustomView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
+    //   csView = CustomSliderView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
         
-       csView = CustomView(colors: ["#FF0000","#FFFF00"], selectedIndex: 2 , isInterpolated : true)
+       csView = CustomSliderView(colors: ["#FF0000","#FFFF00"], selectedIndex: 2 , isInterpolated : true)
         
         view.addSubview(csView)
         
@@ -33,19 +33,19 @@ class ViewController: UIViewController {
         
         csView.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
-        //csView.backgroundColor = .red
-        
-        
-//        let gradient = CAGradientLayer()
-//        gradient.frame = self.view.bounds
-//        gradient.startPoint = CGPoint(x:0, y:0)
-//        gradient.endPoint = CGPoint(x:1, y:0)
-//        gradient.colors = [UIColor.red.cgColor,UIColor.red.cgColor, UIColor.orange.cgColor,UIColor.orange.cgColor, UIColor.blue.cgColor,UIColor.blue.cgColor, UIColor.yellow.cgColor,UIColor.yellow.cgColor]
-//        gradient.locations = [0, 0.25,0.25,0.5,0.5,0.75,0.75,1]
-//        //self.view.layer.addSublayer(gradient)
-//        self.view.layer.insertSublayer(gradient, at: 0)
+        csView.delegate = self
     }
 
 
 }
 
+extension ViewController : CustomSliderViewDelegate{
+
+    func willSelectElement(index: Int, color: UIColor?) {
+        print(index )
+        if color != nil{
+        view.backgroundColor = color
+        }
+    }
+    
+}

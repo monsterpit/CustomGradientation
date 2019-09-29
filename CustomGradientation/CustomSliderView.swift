@@ -1,5 +1,5 @@
 //
-//  CustomView.swift
+//  CustomSliderView.swift
 //  CustomGradientation
 //
 //  Created by Vikas Salian on 9/28/19.
@@ -8,12 +8,14 @@
 
 import UIKit
 
+@objc protocol CustomSliderViewDelegate : class{
+    func willSelectElement(index : Int,color : UIColor?)
+    @objc optional func didSelectElement(index : Int, color : UIColor?)
+}
 
 
 
-
-
-class CustomView: UIView {
+class CustomSliderView: UIView {
 
     private var isInterpolated : Bool = false
     
@@ -22,8 +24,6 @@ class CustomView: UIView {
     private var selectedIndex : Int = 0
     
     private var knobView : UIView!
-    
-   
     
     private var isInitialSetupDone : Bool = false
     
@@ -34,6 +34,8 @@ class CustomView: UIView {
     private var locations : [Float] = []
     
     private var interpolationValueDiff : Float = 0
+    
+    weak var delegate : CustomSliderViewDelegate?
     
     func createLocationsArray(){
         
@@ -165,7 +167,6 @@ class CustomView: UIView {
 
         elementSize = ( frame.width * CGFloat( (1 / Float( isInterpolated ?  locations.count : gradientColors.count) ) ) )
         
-        print(isInterpolated)
         
         var knobSize : CGFloat = elementSize/2
         
@@ -265,7 +266,7 @@ class CustomView: UIView {
         if ( x < 0 || x > 1) {
             return nil
         }
-        print(locations)
+
         
         
         if isInterpolated{
@@ -276,7 +277,7 @@ class CustomView: UIView {
                     
                     if (Float(at.x / frame.width) <= (element + (interpolationValueDiff/Float(2))  ) ){
                         currentIndex = (index)
-                        print(index)
+                       
                         break
                     }
                     
@@ -285,17 +286,13 @@ class CustomView: UIView {
                     
                     if (Float(at.x / frame.width) >= (element - (interpolationValueDiff/Float(2))  ) ){
                         currentIndex = (index)
-                        print(index)
+                        
                         break
                     }
                     //(Float(at.x / frame.width)
                 }
                 else if  ((element - (interpolationValueDiff/Float(2)))..<(element + (interpolationValueDiff/Float(2)))).contains(Float(at.x / frame.width)){
-                    print(index)
-                    print(Float(at.x / frame.width))
-                    print((element + (interpolationValueDiff/Float(2))  ))
-                    print((element - (interpolationValueDiff/Float(2))  ))
-                        
+                    
                     currentIndex = (index)
                     break
                 }
@@ -334,33 +331,42 @@ class CustomView: UIView {
         if index != selectedIndex{
             selectedIndex = index
             
-            UIView.animate(withDuration: 0.3) {
+            
+            self.delegate?.willSelectElement(index: self.selectedIndex, color: self.isInterpolated ? nil : self.gradientColors[self.selectedIndex])
+            
+            UIView.animate(withDuration: 0.3, animations: {
                 [weak self] in
                 guard let `self` = self else {return}
-
+                
                 if self.isInterpolated{
                     
                     if index == 0 {
                         self.knobView.frame.origin.x = self.frame.minX
                     }
                     else if index == self.locations.count - 1{
-
+                        
                         self.knobView.frame.origin.x = self.frame.maxX - self.knobView.frame.width
                     }
                     else{
                         self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
                     }
                     
-
+                    
                 }
                 else{
                     
                     self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
                     
                 }
+                
+                
+            }) { (bool) in
 
+                self.delegate?.didSelectElement?(index: self.selectedIndex, color: self.isInterpolated ? nil : self.gradientColors[self.selectedIndex])
                 
             }
+            
+           // UIView.animate(withDuration: 0.3)
         }
     }
     
