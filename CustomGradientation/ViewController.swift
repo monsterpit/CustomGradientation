@@ -27,7 +27,7 @@ class ViewController: UIViewController {
         
         csView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10).isActive = true
         
-        csView.topAnchor.constraint(equalTo: view.topAnchor, constant: 50).isActive = true
+        csView.topAnchor.constraint(equalTo: view.topAnchor, constant: 300).isActive = true
         
         csView.heightAnchor.constraint(equalToConstant: 50).isActive = true
         

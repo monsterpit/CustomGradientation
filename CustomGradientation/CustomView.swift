@@ -14,6 +14,8 @@ class CustomView: UIView {
     
     private var gradientColors : [UIColor] = []
     
+    private var selectedIndex : Int = 0
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -27,8 +29,19 @@ class CustomView: UIView {
     required init(colors : [String]  ,selectedIndex : Int = 0) {
         super.init(frame: CGRect.zero)
         
+        self.selectedIndex = selectedIndex
+        
         gradientColors = colors.map{$0.hexColor}
+        
+    }
     
+    required init(colors : [UIColor]  ,selectedIndex : Int = 0) {
+        super.init(frame: CGRect.zero)
+        
+        self.selectedIndex = selectedIndex
+        
+        gradientColors = colors.map{$0}
+        
     }
     
     
@@ -83,30 +96,51 @@ class CustomView: UIView {
     }
     
     //Todo:- Create a Knob View
-    func createKnobForSlider(elementWidth : CGFloat) {
+    func createKnobForSlider(knobSize : inout CGFloat) {
         
-        let knobView = UIView(frame: CGRect(x: 0, y: 0, width: elementWidth/2, height: elementWidth/2))
+        
+    
+        let elementSize = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) ) )
+        
+        var knobViewX : CGFloat = 0
+       
+         //knobSize < rect.height ? knobSize * 2 : knobSize
+        
+        if knobSize > frame.height{
+            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex )) + (elementSize/4)
+        }
+        else{
+            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex ))
+            knobSize = knobSize * 2
+        }
+
+        
+        let knobViewY = frame.height < knobSize ? frame.minY - (knobSize - frame.height)/2 : frame.minY
+        
+        let knobView = UIView(frame: CGRect(x: knobViewX, y: knobViewY, width: knobSize, height: knobSize))
         knobView.layer.cornerRadius = knobView.frame.width/2
         
         knobView.clipsToBounds = true
         knobView.backgroundColor = .black
        // addSubview(knobView)
         
+        print(knobView)
+        
         superview?.addSubview(knobView)
         
-        knobView.translatesAutoresizingMaskIntoConstraints = false
-        
-       // knobView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-        
-      //  knobView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-        
-        knobView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0)
-        
-       // knobView.topAnchor.constraint(equalTo: topAnchor, constant: 2).isActive = true
-        
-        knobView.heightAnchor.constraint(equalToConstant: knobView.frame.height).isActive = true
-        
-        knobView.widthAnchor.constraint(equalToConstant: knobView.frame.width).isActive = true
+//        knobView.translatesAutoresizingMaskIntoConstraints = false
+//
+//       // knobView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
+//
+//      //  knobView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
+//
+//        knobView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0)
+//
+//       // knobView.topAnchor.constraint(equalTo: topAnchor, constant: 2).isActive = true
+//
+//        knobView.heightAnchor.constraint(equalToConstant: knobView.frame.height).isActive = true
+//
+//        knobView.widthAnchor.constraint(equalToConstant: knobView.frame.width).isActive = true
         
     }
    
@@ -116,7 +150,14 @@ class CustomView: UIView {
         // Drawing code
         gradientMaker()
         createRoundedCorners(radius: rect.height/2)
-        createKnobForSlider(elementWidth: rect.width * CGFloat( (1 / Float(gradientColors.count) ) ) )
+        
+    
+        
+        var knobSize = ( rect.width * CGFloat( (1 / Float(gradientColors.count) ) )
+            / 2 )
+        
+       
+        createKnobForSlider(knobSize: &knobSize )
      
     }
  
