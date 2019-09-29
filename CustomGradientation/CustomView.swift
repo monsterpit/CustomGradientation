@@ -2,8 +2,8 @@
 //  CustomView.swift
 //  CustomGradientation
 //
-//  Created by MB on 9/28/19.
-//  Copyright © 2019 MB. All rights reserved.
+//  Created by Vikas Salian on 9/28/19.
+//  Copyright © 2019 Vikas Salian. All rights reserved.
 //
 
 import UIKit
@@ -16,6 +16,27 @@ class CustomView: UIView {
     
     private var selectedIndex : Int = 0
     
+    private var knobView : UIView!
+    
+   
+    
+    private var isInitialSetupDone : Bool = false
+    
+    private var padding : CGFloat = 0
+    
+    private var elementSize : CGFloat = 0
+    
+    private var locations : [Float] = []
+    
+    func createLocationsArray(){
+        let step : Float = 1/Float(gradientColors.count)
+        for i in stride(from: Float(0), through: Float(1), by: step) {
+            locations.append(i)
+        }
+    }
+    
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -26,19 +47,23 @@ class CustomView: UIView {
         super.init(coder : aDecoder)
     }
     
-    required init(colors : [String]  ,selectedIndex : Int = 0) {
+    required init(colors : [String]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false ) {
         super.init(frame: CGRect.zero)
         
-        self.selectedIndex = selectedIndex
+        self.selectedIndex = selectedIndex < colors.count ? selectedIndex : 0
+        
+        self.isInterpolated = isInterpolated
         
         gradientColors = colors.map{$0.hexColor}
         
     }
     
-    required init(colors : [UIColor]  ,selectedIndex : Int = 0) {
+    required init(colors : [UIColor]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false) {
         super.init(frame: CGRect.zero)
         
-        self.selectedIndex = selectedIndex
+        self.selectedIndex = selectedIndex < colors.count ? selectedIndex : 0
+        
+        self.isInterpolated = isInterpolated
         
         gradientColors = colors.map{$0}
         
@@ -83,6 +108,9 @@ class CustomView: UIView {
         
         }
         else{
+            gradient.colors = gradientColors.map{$0.cgColor}
+            
+            locations = [0,0.5,1]
             
         }
         
@@ -96,69 +124,149 @@ class CustomView: UIView {
     }
     
     //Todo:- Create a Knob View
-    func createKnobForSlider(knobSize : inout CGFloat) {
+    func createKnobForSlider(strokeColor : UIColor = .white , strokeWidth : CGFloat = 0 , backgroundColor : UIColor = .clear,shadowColor : UIColor = .darkGray) {
         
-        
+        //Setting Frame For KnobView
+        var knobSize : CGFloat = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) )
+            / 2 )
     
-        let elementSize = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) ) )
+        elementSize = ( frame.width * CGFloat( (1 / Float(gradientColors.count) ) ) )
         
         var knobViewX : CGFloat = 0
        
-         //knobSize < rect.height ? knobSize * 2 : knobSize
+        var knobViewY : CGFloat = 0
         
+        //If we Knob Size is greater than frame
         if knobSize > frame.height{
-            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex )) + (elementSize/4)
+            padding =  (elementSize/4)
+            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex )) + padding
+            knobViewY =  frame.minY - ((knobSize - frame.height)/2)
         }
         else{
-            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex ))
+            padding = 0
+            knobViewX = frame.minX + (elementSize * CGFloat(selectedIndex )) + padding
             knobSize = knobSize * 2
+            knobViewY = frame.minY + ((frame.height - knobSize) / 2)
+           
         }
 
         
-        let knobViewY = frame.height < knobSize ? frame.minY - (knobSize - frame.height)/2 : frame.minY
+        knobView = UIView(frame: CGRect(x: knobViewX, y: knobViewY, width: knobSize, height: knobSize))
         
-        let knobView = UIView(frame: CGRect(x: knobViewX, y: knobViewY, width: knobSize, height: knobSize))
+        //Design For KnobView
         knobView.layer.cornerRadius = knobView.frame.width/2
+        knobView.layer.borderWidth =   strokeWidth == 0 ?  knobView.frame.width/8 : strokeWidth
+        knobView.layer.borderColor = strokeColor.cgColor
+        knobView.layer.shadowColor = shadowColor.cgColor
+        knobView.layer.shadowOpacity = 1
+        knobView.layer.shadowRadius = 10
         
-        knobView.clipsToBounds = true
-        knobView.backgroundColor = .black
-       // addSubview(knobView)
-        
-        print(knobView)
-        
+      //  knobView.clipsToBounds = true
+        knobView.backgroundColor = .clear
+
         superview?.addSubview(knobView)
         
-//        knobView.translatesAutoresizingMaskIntoConstraints = false
-//
-//       // knobView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
-//
-//      //  knobView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
-//
-//        knobView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 0)
-//
-//       // knobView.topAnchor.constraint(equalTo: topAnchor, constant: 2).isActive = true
-//
-//        knobView.heightAnchor.constraint(equalToConstant: knobView.frame.height).isActive = true
-//
-//        knobView.widthAnchor.constraint(equalToConstant: knobView.frame.width).isActive = true
+        //Setting Gestures
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(sender:)))
+        //self.addGestureRecognizer(panGesture)
+        knobView.addGestureRecognizer(panGesture)
+        
+        //Tap Gestures
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(sender:)))
+        self.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc
+    func handlePan(sender panGesture: UIPanGestureRecognizer) {
+        
+
+        
+       if panGesture.state == .changed {
+            let location: CGPoint = panGesture.location(in: self)
+            
+             moveKnobToIndex(point : location)
+
+        }
         
     }
-   
+    
+    
+    @objc
+    func handleTap(sender tapGesture : UITapGestureRecognizer){
+        
+        if tapGesture.state == .ended{
+            
+            let location : CGPoint = tapGesture.location(in: self)
+            
+             moveKnobToIndex(point : location)
+            
+        }
+        
+    }
+    
+    
+    func getIndexFromPosition(at : CGPoint) -> Int?{
+      
+        let x = Float(at.x / frame.width)
+        
+        var currentIndex = selectedIndex
+        
+        if ( x < 0 || x > 1) {
+            return nil
+        }
+        
+        for (index,element) in locations.enumerated(){
+            if (Float(at.x / frame.width) <= element){
+                currentIndex = (index-1)
+                break
+            }
+        }
+
+        return currentIndex
+        
+
+        
+    }
+    
+    
+    func moveKnobToIndex(point : CGPoint){
+        
+        
+        guard let index : Int  = getIndexFromPosition(at: point) else {return}
+
+        if index != selectedIndex{
+            selectedIndex = index
+            
+            UIView.animate(withDuration: 0.3) {
+                [weak self] in
+                guard let `self` = self else {return}
+
+                self.knobView.frame.origin.x = self.frame.minX + (self.elementSize * CGFloat(self.selectedIndex )) + self.padding
+                    
+
+                
+            }
+        }
+    }
+    
+    
+
+
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
     override func draw(_ rect: CGRect) {
         // Drawing code
+        
+        if !isInitialSetupDone {
+        createLocationsArray()
+        
         gradientMaker()
         createRoundedCorners(radius: rect.height/2)
+        createKnobForSlider( )
+        isInitialSetupDone.toggle()
+        }
         
-    
         
-        var knobSize = ( rect.width * CGFloat( (1 / Float(gradientColors.count) ) )
-            / 2 )
-        
-       
-        createKnobForSlider(knobSize: &knobSize )
-     
     }
  
 
