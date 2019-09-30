@@ -59,7 +59,7 @@ class CustomSliderView: UIView {
         super.init(coder : aDecoder)
     }
     
-    required init(colors : [String]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false ,interpolationValue : Int = 2) {
+    required init(colors : [String]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false ,interpolationValue : Int = 1) {
         super.init(frame: CGRect.zero)
         
 
@@ -67,7 +67,7 @@ class CustomSliderView: UIView {
         self.isInterpolated = isInterpolated
         
         if isInterpolated{
-            createInterpolationRange(n: interpolationValue)
+            createInterpolationRange(n: interpolationValue + 1)
         }
         
         self.selectedIndex = selectedIndex < colors.count || selectedIndex < locations.count ? selectedIndex : 0
@@ -76,13 +76,13 @@ class CustomSliderView: UIView {
         
     }
     
-    required init(colors : [UIColor]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false,interpolationValue : Int = 2) {
+    required init(colors : [UIColor]  ,selectedIndex : Int = 0 ,isInterpolated : Bool = false,interpolationValue : Int = 1) {
         super.init(frame: CGRect.zero)
 
         self.isInterpolated = isInterpolated
         
         if isInterpolated{
-            createInterpolationRange(n: interpolationValue)
+            createInterpolationRange(n: interpolationValue + 1)
         }
         
         self.selectedIndex = selectedIndex < colors.count || selectedIndex < locations.count ? selectedIndex : 0

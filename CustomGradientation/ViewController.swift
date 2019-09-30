@@ -17,9 +17,9 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         
-    //   csView = CustomSliderView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
+        //   csView = CustomSliderView(colors: ["#FF0000","#FFFF00","#0000ff","#FF0000","#FFFF00","#0000ff"], selectedIndex: 3 )
         
-       csView = CustomSliderView(colors: ["#FF0000","#FFFF00"], selectedIndex: 2 , isInterpolated : true)
+        csView = CustomSliderView(colors: ["#FF0000","#FFFF00"], selectedIndex: 2 , isInterpolated : true,interpolationValue: 1)
         
         view.addSubview(csView)
         
@@ -44,7 +44,7 @@ extension ViewController : CustomSliderViewDelegate{
     func willSelectElement(index: Int, color: UIColor?) {
         print(index )
         if color != nil{
-        view.backgroundColor = color
+            //  view.backgroundColor = color
         }
     }
     
